@@ -18,7 +18,7 @@ dependencies {
 ```
 
 ## Usage
-* craete
+* create
 ```java
 Resample resample = new Resample();
 resample.create(48000, 16000, 2048, 1);
