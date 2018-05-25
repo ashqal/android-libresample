@@ -8,10 +8,6 @@ import java.nio.ByteBuffer;
  */
 public class Resample {
 
-    static {
-        System.loadLibrary("resample");
-    }
-
     private long ptr;
 
     private static final String RESAMPLE_LIB = "resample";
