@@ -1,9 +1,11 @@
 #include <jni.h>
+#include <android/log.h>
+#include <math.h>
 
 #undef net_sourceforge_resample_Resample_DEFAULT_BUFFER_SIZE
 #define net_sourceforge_resample_Resample_DEFAULT_BUFFER_SIZE 4096L
 #undef net_sourceforge_resample_Resample_MAX_CHANNELS
-#define net_sourceforge_resample_Resample_MAX_CHANNELS 2L
+#define net_sourceforge_resample_Resample_MAX_CHANNELS 1L
 #undef net_sourceforge_resample_Resample_CHANNEL_MONO
 #define net_sourceforge_resample_Resample_CHANNEL_MONO 0L
 #undef net_sourceforge_resample_Resample_CHANNEL_LEFT
@@ -32,6 +34,12 @@ Java_com_asha_libresample2_Resample_init__IIII(JNIEnv *env, jobject instance, ji
     resample_data* data = malloc(sizeof(resample_data));
     int i;
     data->num_channels = channels;
+    if (data->num_channels > net_sourceforge_resample_Resample_MAX_CHANNELS) {
+        __android_log_print(ANDROID_LOG_DEBUG, "libresample.so",
+                            "Resample supports stereo, mono only!");
+        return -1;
+    }
+
     data->rs = calloc(data->num_channels, sizeof(struct rs_data *));
     for (i = 0; i < data->num_channels; i++) {
         data->rs[i] =
@@ -69,4 +77,19 @@ Java_com_asha_libresample2_Resample_resample__DLjava_nio_ByteBuffer_2Ljava_nio_B
     int shortLen = byteLen / scale;
     int num = resample_simple(factor, (short *) inData, (short *) outData, shortLen);
     return num * scale;
+}
+
+JNIEXPORT jint JNICALL
+Java_com_asha_libresample2_Resample_resampleEx(JNIEnv *env, jobject instance, jlong ptr,
+                                               jobject inputBuffer, jobject outputBuffer,
+                                               jint byteLen) {
+    int res;
+    resample_data* data = (resample_data *) ptr;
+    const char* inData = (char *) (*env)->GetDirectBufferAddress(env, inputBuffer);
+    const char* outData = (char *) (*env)->GetDirectBufferAddress(env, outputBuffer);
+    int scale = sizeof(short) / sizeof(char);
+    int shortLenIn = byteLen / scale;
+    int shortLenOut = (int) ceil(byteLen * 1.0f * data->rs[net_sourceforge_resample_Resample_CHANNEL_MONO]->factor / scale);
+    res = resample(data->rs[net_sourceforge_resample_Resample_CHANNEL_MONO], (short *) inData, shortLenIn, (short *) outData, shortLenOut, 1);
+    return res > 0 ? res * scale : -1;
 }

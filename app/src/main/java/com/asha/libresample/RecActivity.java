@@ -65,7 +65,7 @@ public class RecActivity extends AppCompatActivity {
                 switch (state) {
                     case Recording:
                         if (cached.remaining() >= buffer.remaining()) {
-                            int num = resample.resample(buffer, processed, buffer.remaining());
+                            int num = resample.resampleEx(buffer, processed, buffer.remaining());
                             Log.w(TAG, String.format("input size:%d output size:%d", buffer.limit(), num));
                             cached.put(processed.array(), processed.arrayOffset(), num);
                             setText(String.format("正在录音:%d/%d", cached.position(), cached.limit()));

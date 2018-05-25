@@ -8,7 +8,7 @@ import java.nio.ByteBuffer;
  */
 public class Resample {
 
-    private long ptr;
+    private long ptr = -1;
 
     private static final String RESAMPLE_LIB = "resample";
 
@@ -18,22 +18,31 @@ public class Resample {
 
     public void create(int inputRate, int outputRate, int bufferSize, int channels) {
         ptr = init(inputRate, outputRate, bufferSize, channels);
+        if (ptr == -1) {
+            throw new IllegalArgumentException("create failed");
+        }
     }
 
     public void destroy() {
         close(ptr);
-        ptr = 0;
+        ptr = -1;
     }
 
     public double getFactor() {
         return getFactor(ptr);
     }
 
-    public int resample(ByteBuffer inputBuffer, ByteBuffer outputBuffer, int numSamples) {
-        return resample(getFactor(), inputBuffer, outputBuffer, numSamples);
+    public int resample(ByteBuffer inputBuffer, ByteBuffer outputBuffer, int byteLen) {
+        return resample(getFactor(), inputBuffer, outputBuffer, byteLen);
+    }
+
+    public int resampleEx(ByteBuffer inputBuffer, ByteBuffer outputBuffer, int byteLen) {
+        return resampleEx(ptr, inputBuffer, outputBuffer, byteLen);
     }
 
     private native int resample(double factor, ByteBuffer inputBuffer, ByteBuffer outputBuffer, int dataLen);
+
+    private native int resampleEx(long ptr, ByteBuffer inputBuffer, ByteBuffer outputBuffer, int dataLen);
 
     private native long init(int inputRate, int outputRate, int bufferSize, int channels);
 
