@@ -13,7 +13,7 @@ allprojects {
 
 ```java
 dependencies {
-  implementation 'com.github.User:Repo:Tag'
+  implementation 'com.github.ashqal:android-libresample:0.3.0'
 }
 ```
 
