@@ -27,7 +27,7 @@ resample.create(48000, 16000, 2048, 1);
 * destroy
 ```java
 Resample resample = new Resample();
-resample.destroy(48000, 16000, 2048, 1);
+resample.destroy();
 ```
 
 * resample
